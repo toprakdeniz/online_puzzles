@@ -4,6 +4,7 @@ fn biggerIsGreater(w: &str) -> String {
     // find to lowest char greater then w[i-1]
     // change their position
     // sort w[i..end]
+
     let mut w_: Vec<u8> = w.as_bytes().to_vec();
     for i in (1..w.len()).rev(){
         if w_[i] > w_[i-1]{
