@@ -115,16 +115,15 @@ class Prism:
     def isValid(self, terrain):
         coords = self.pose.coords(self.x, self.y)
         for coord in coords:
-            if coord[0] < 0 or coord[0] >= len(terrain) or coord[1] < 0 or coord[1] >= len(terrain[0]):
+            if coord[0] < 0 or coord[0] >= len(terrain[0]) or coord[1] < 0 or coord[1] >= len(terrain):
                 return False
-            if terrain[coord[0]][coord[1]] == 0:
+            if terrain[coord[1]][coord[0]] == "0":
                 return False
         return True
     
     
     def _heuristic_function(self):
-        return abs(self.x-self.the_goal_x)+abs(self.y-self.the_goal_y)
-    
+        return (min([abs(x-self.the_goal_x)+abs(y-self.the_goal_y) for (x,y) in self.pose.coords(self.x, self.y)]) // 3 + 1) * 2
     
     def extent_move(self):
         result = []
@@ -166,16 +165,22 @@ def blox_solver(ar):
                 goal_x, goal_y = i, j
                 
     start_prism = Prism(start_x, start_y, Pose.STANDING, None, 0, None, goal_x, goal_y)
+    print(ar[start_y][start_x], ar[goal_y][goal_x])
     heap = [start_prism]
     
     current_prism = find_path(heap)
-    result = []
     if not current_prism:
         return "impossible"
+    result = []
+    coords = [(current_prism.x, current_prism.y)]
     while current_prism.parent:
         result.append(current_prism.last_move)
         current_prism = current_prism.parent
-    return "".join(result[::-1])
+        coords.append((current_prism.x, current_prism.y))
+    print(coords)
+    print("result", result)
+    
+    return "".join(reversed(result))
 
 
 
@@ -223,6 +228,7 @@ example_tests = [
 	'000000111110000',
 	'000000011100000']
 ]
+
 
 
 example_sols = [['RRDRRRD','RDDRRDR','RDRRDDR'],['ULDRURRRRUURRRDDDRU','RURRRULDRUURRRDDDRU'],['ULURRURRRRRRDRDDDDDRULLLLLLD'],['DRURURDDRRDDDLD'],['RRRDRDDRDDRULLLUULUUURRRDDLURRDRDDR','RRRDDRDDRDRULLLUULUUURRDRRULDDRRDDR','RRRDRDDRDDRULLLUULUUURRDRRULDDRRDDR','RRRDDRDDRDRULLLUULUUURRRDDLURRDRDDR']]
