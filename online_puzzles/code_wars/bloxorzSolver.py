@@ -1,6 +1,7 @@
 from enum import Enum
 from heapq import heappush, heappop
-from time import sleep
+
+
 move_opposites = {"R" : "L", "L" : "R", "U" : "D", "D" : "U"}
 
 class Pose(Enum):
@@ -11,9 +12,9 @@ class Pose(Enum):
 
     def coords(self, x, y):
         if self == Pose.HORIZONTAL:
-            return [(x, y), (x, y-1)]
-        elif self == Pose.VERTICAL:
             return [(x, y), (x+1, y)]
+        elif self == Pose.VERTICAL:
+            return [(x, y), (x, y-1)]
         else:
             return [(x, y)]
 
@@ -123,7 +124,9 @@ class Prism:
     
     
     def _heuristic_function(self):
-        return (min([abs(x-self.the_goal_x)+abs(y-self.the_goal_y) for (x,y) in self.pose.coords(self.x, self.y)]) // 3 + 1) * 2
+        # heuristix has /2 because we can move 2 blocks at once. 
+        # This little trick makes heuristic admissible
+        return min([abs(x-self.the_goal_x)+abs(y-self.the_goal_y) for (x,y) in self.pose.coords(self.x, self.y)]) / 2
     
     def extent_move(self):
         result = []
@@ -154,6 +157,8 @@ def blox_solver(ar):
                     if terrain[prism.pose].get((prism.x, prism.y), 1000000) > prism.cost:
                         terrain[prism.pose][(prism.x, prism.y)] = prism.cost
                         heappush(heap, prism)
+        print("no path found")
+        return None
 
     start_x, start_y = None, None
     goal_x, goal_y = None, None
@@ -230,8 +235,14 @@ example_tests = [
 ]
 
 
-
-example_sols = [['RRDRRRD','RDDRRDR','RDRRDDR'],['ULDRURRRRUURRRDDDRU','RURRRULDRUURRRDDDRU'],['ULURRURRRRRRDRDDDDDRULLLLLLD'],['DRURURDDRRDDDLD'],['RRRDRDDRDDRULLLUULUUURRRDDLURRDRDDR','RRRDDRDDRDRULLLUULUUURRDRRULDDRRDDR','RRRDRDDRDDRULLLUULUUURRDRRULDDRRDDR','RRRDDRDDRDRULLLUULUUURRRDDLURRDRDDR']]
+                                            
+example_sols = [['RRDRRRD','RDDRRDR','RDRRDDR'],
+                # URDRURRURURRRDDRRDRUL
+                ['ULDRURRRRUURRRDDDRU','RURRRULDRUURRRDDDRU'],
+                ['ULURRURRRRRRDRDDDDDRULLLLLLD'],
+            #     RRRDRDRDDLDRDL
+                ['DRURURDDRRDDDLD'],
+                ['RRRDRDDRDDRULLLUULUUURRRDDLURRDRDDR','RRRDDRDDRDRULLLUULUUURRDRRULDDRRDDR','RRRDRDDRDDRULLLUULUUURRDRRULDDRRDDR','RRRDDRDDRDRULLLUULUUURRRDDLURRDRDDR']]
 for i,x in enumerate(example_tests):
     solution = blox_solver(x)
     print(solution, solution in example_sols[i])
